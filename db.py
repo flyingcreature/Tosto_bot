@@ -107,6 +107,26 @@ def get_all_users_data():
     return result
 
 
+def get_user_data(user_id: int):
+    """Функция для получения конкретной информации от пользователя"""
+    if is_user_in_db(user_id):
+        sql_query = (
+            f"SELECT * "
+            f"FROM {DB_TABLE_USERS_NAME} "
+            f"WHERE user_id = {user_id}"
+        )
+
+        row = execute_query(sql_query)[0]
+        result = {
+            "user_name": row[2],
+            "event": row[3],
+            "human": row[4],
+            "long_tost": row[5],
+            "gpt_tokens": row[6],
+        }
+        return result # что бы воспользоваться информацией просто пропипши вот так:  gpt_tokens = db.get_user_data(user_id)["gpt_tokens"] и тогда ты получишь токены в переменную gpt_tokens
+
+
 def is_user_in_db(user_id: int) -> bool:
     """Функция узнать есть ли пользователь в базе"""
     sql_query = f"SELECT user_id " f"FROM {DB_TABLE_USERS_NAME} " f"WHERE user_id = ?;"

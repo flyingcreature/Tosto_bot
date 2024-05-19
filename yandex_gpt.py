@@ -9,7 +9,6 @@ from config import (
     GPT_MODEL,
     LOGS_PATH,
     MAX_MODEL_TOKENS,
-    SYSTEM_PROMPT,
     URL_GPT,
     URL_TOKENS
 )
@@ -22,29 +21,54 @@ logging.basicConfig(
 )
 
 
-def count_gpt_tokens(messages: list) -> int:
-    """Функция для подсчёта токенов в сообщении"""
+def count_tokens_in_dialogue(messages: list) -> int:
     iam_token = get_iam_token()
-
     headers = {
-        "Authorization": f"Bearer {iam_token}",
-        "Content-Type": "application/json",
+        'Authorization': f'Bearer {iam_token}',
+        'Content-Type': 'application/json'
     }
-    data = {"modelUri": f"gpt://{FOLDER_ID}/{GPT_MODEL}-lite", "messages": messages}
+    data = {
+        "modelUri": f"gpt://{FOLDER_ID}/{GPT_MODEL}/latest",
+        "maxTokens": MAX_MODEL_TOKENS,
+        "messages": []
+    }
+
+    for row in messages:
+        data["messages"].append(
+            {
+                "role": row["role"],
+                "text": row["content"]
+            }
+        )
     try:
-        return len(
-            requests.post(url=URL_TOKENS, json=data, headers=headers).json()["tokens"]
+        result = requests.post(
+            url=URL_TOKENS,
+            json=data,
+            headers=headers
         )
 
+        return len(result.json()["tokens"])
     except Exception as e:
-        logging.error(
-            f"Ошибка при подсчёте токенов{e}"
-        )
-        return 0
+        print(f"Ошибка при подсчёте токенов{e}")
+        logging.error(f"Ошибка при подсчёте токенов{e}")
 
 
-def ask_gpt_helper():
-    """Отправляет запрос к модели GPT с задачей"""
+def get_system_content(event, human, long_tost):
+    """Функция, которая собирает строку для system_content"""
+    return (
+        f"Ты известный ведущий с большим стажем, "
+        f"у тебя большой опыт в составлении тостов и поздравлений на различные мероприятия. "
+        f"Твоя задача придумать тост на {event}. Поздравлять ты будешь {human}. "
+        f"По длине поздравление должно быть {long_tost}. "
+        f"Не давай никаких инструкций, пользователь знает всё сам."
+    )
+
+
+def ask_gpt_helper(messages) -> str:
+    """
+    Отправляет запрос к модели GPT с задачей и предыдущим ответом
+    для получения ответа или следующего шага
+    """
     iam_token = get_iam_token()
 
     headers = {
@@ -52,29 +76,46 @@ def ask_gpt_helper():
         "Authorization": f"Bearer {iam_token}",
         "x-folder-id": f"{FOLDER_ID}",
     }
+
     data = {
-        "modelUri": f"gpt://{FOLDER_ID}/{GPT_MODEL}-lite",
+        "modelUri": f"gpt://{FOLDER_ID}/{GPT_MODEL}/latest",
         "completionOptions": {
             "stream": False,
-            "temperature": 0.7,
-            "maxTokens": MAX_MODEL_TOKENS,
+            "temperature": 0.6,
+            "maxTokens": MAX_MODEL_TOKENS
         },
-        "messages": SYSTEM_PROMPT
+        "messages": []
     }
-    try:
-        response = requests.post(url=URL_GPT, headers=headers, json=data)
 
+    for row in messages:
+        data["messages"].append(
+            {
+                "role": row["role"],
+                "text": row["content"]
+            }
+        )
+    try:
+        response = requests.post(
+            url=URL_GPT,
+            headers=headers,
+            json=data
+        )
     except Exception as e:
         print(f"Произошла непредвиденная ошибка: {e}.")
         logging.error(f"Произошла непредвиденная ошибка: {e}.")
-        return False, "Ошибка при обращении к GPT", None
     else:
         if response.status_code != 200:
             print("Не удалось получить ответ :(")
             logging.error(f"Получена ошибка: {response.json()}")
-            return False, f"Ошибка GPT. Статус-код: {response.status_code}", None
 
         else:
-            answer = response.json()["result"]["alternatives"][0]["message"]["text"]
-            tokens_in_answer = count_gpt_tokens([{"role": "assistant", "text": answer}])
-            return True, answer, tokens_in_answer
+            result = response.json()["result"]["alternatives"][0]["message"]["text"]
+            messages.append({"role": "assistant", "content": result})
+            return result
+
+
+#Примеры, как работать с gpt. Использовла коенструкции, как нам показывал Миша в боте Генераторе сценариев. Тут механика схожа.
+# user_content = "Продолжи историю."  # Формируем user_content
+# messages.append({"role": "user", "content": user_content})
+# tokens_messages = count_tokens_in_dialogue(messages)
+# user_tokens += count_tokens_in_dialogue([{"role": "assistant", "content": answer}])
