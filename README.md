@@ -27,5 +27,10 @@
 
 Для связи с разработчиками можно использовать следующие контакты:
 
+### Kirill
 - [Telegram](https://t.me/flying_creature)
 - Discord: Летающее существо
+
+### Kirill
+- [Telegram](https://t.me/stifild)
+- Discord: iiowoii
