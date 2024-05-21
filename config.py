@@ -22,8 +22,9 @@ MAX_USER_GPT_TOKENS = 5000  # 5 000 токенов для генерации т�
 
 DB_NAME = f"db.sqlite"  # файл для базы данных
 
-DB_TABLE_USERS_NAME = "users"  # Название таблицы
+DB_TABLE_USERS_NAME = "users"  # Название таблицы, где хранятся данные для создания поздравления
 
+DB_TABLE_USERS_CONGRATULATION = "congratulation"  # Название таблицы, где хранятся поздравления пользователя
 
 GPT_MODEL = "yandexgpt"  # Модель gpt
 
@@ -36,5 +37,3 @@ URL_TOKENS = "https://llm.api.cloud.yandex.net/foundationModels/v1/tokenizeCompl
 URL_GPT = (
     "https://llm.api.cloud.yandex.net/foundationModels/v1/completion"  # Ссылка на gpt
 )
-
-
