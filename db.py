@@ -59,8 +59,8 @@ def create_table():
             f"user_name TEXT, "
             f"event TEXT, "
             f"human TEXT, "
-            f"long_congratulation TEXT, "
-            f"user_birthday TEXT, "
+            f"long_congratulation INTEGER, "
+            f"user_birthday REAL,"
             f"gpt_tokens INTEGER); "
         )
         execute_query(sql_query)
@@ -73,7 +73,7 @@ def create_table():
             f"user_id INTEGER, "
             f"user_name TEXT, "
             f"honored TEXT, "
-            f"birthday_honored TEXT, "
+            f"birthday_honored REAL, "
             f"text_congratulation TEXT, "
             f"FOREIGN KEY (user_id) REFERENCES {DB_TABLE_USERS_NAME} (user_id)); "
         )
@@ -89,20 +89,23 @@ def add_new_user(
     table: str,
     user_id: int,
     user_name: str,
-    gpt_tokens: int | None,
-    honored: str | None,
-    birthday_honored: str | None,
-    text_congratulation: str | None,
+    gpt_tokens: int | None = None,
+    long_congratulation: int | None = None,
+    honored: str | None = None,
+    birthday_honored: str | None = None,
+    text_congratulation: str | None = None,
 ):
     """Функция добавления нового пользователя в базу"""
     if table == DB_TABLE_USERS_NAME:
         if not is_user_in_db(table, user_id):
             sql_query = (
                 f"INSERT INTO {DB_TABLE_USERS_NAME} "
-                f"(user_id, user_name, gpt_tokens) "
-                f"VALUES (?, ?, ?);"
+                "(user_id, user_name, gpt_tokens, long_congratulation) "
+                "VALUES (?, ?, ?, ?);"
             )
-            execute_query(sql_query, (user_id, user_name, gpt_tokens))
+            execute_query(
+                sql_query, (user_id, user_name, gpt_tokens, long_congratulation)
+            )
             print("Пользователь успешно добавлен в таблицу 1")
             logging.info("Пользователь успешно добавлен в таблицу 1 ")
 
