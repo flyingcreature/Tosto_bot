@@ -41,7 +41,11 @@ def start(message: telebot.types.Message):
 
 
 @bot.message_handler(commands=["help"])
-def help(message: telebot.types.Message): ...
+def help(message: telebot.types.Message):
+    bot.send_message(
+        message.chat.id,
+        "Чтобы сгенерировать тост, напиши /gen\nЧтобы увидить последний сгенерированый тост напиши /last\nОткрыть меню - /menu\n\nP.S. Все эти команды видны в списке слева от поля ввода ;)",
+    )
 
 
 @bot.message_handler(commands=["gen"])
@@ -70,7 +74,7 @@ def logs(message: telebot.types.Message):
 def text(message: telebot.types.Message):
     bot.send_message(
         message.chat.id,
-        "Кажется я потерял контекст :(\nПожайлуста запусти генерацию или воспользуйся меню)",
+        "Кажется я потерял контекст :(\nПожайлуста запусти генерацию или воспользуйся меню.",
     )
 
 
