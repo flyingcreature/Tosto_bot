@@ -1,7 +1,12 @@
 import logging
 import sqlite3
 
-from config import DB_NAME, DB_TABLE_USERS_NAME, LOGS_PATH, DB_TABLE_USERS_CONGRATULATION
+from config import (
+    DB_NAME,
+    DB_TABLE_USERS_NAME,
+    LOGS_PATH,
+    DB_TABLE_USERS_CONGRATULATION,
+)
 
 logging.basicConfig(
     filename=LOGS_PATH,
@@ -77,14 +82,18 @@ def create_table():
         logging.info("Таблица 2 успешно создана")
 
     except Exception as e:
-        logging.error(
-            f"Ошибка при создании таблиц: {e}"
-        )
+        logging.error(f"Ошибка при создании таблиц: {e}")
 
 
-def add_new_user(table: str, user_id: int, user_name: str, gpt_tokens: int | None, honored: str | None,
-                 birthday_honored: str | None,
-                 text_congratulation: str | None):
+def add_new_user(
+    table: str,
+    user_id: int,
+    user_name: str,
+    gpt_tokens: int | None,
+    honored: str | None,
+    birthday_honored: str | None,
+    text_congratulation: str | None,
+):
     """Функция добавления нового пользователя в базу"""
     if table == DB_TABLE_USERS_NAME:
         if not is_user_in_db(table, user_id):
@@ -107,7 +116,10 @@ def add_new_user(table: str, user_id: int, user_name: str, gpt_tokens: int | Non
             f"(user_id, user_name, honored, birthday_honored, text_congratulation) "
             f"VALUES (?, ?, ?, ?, ?);"
         )
-        execute_query(sql_query, (user_id, user_name, honored, birthday_honored, text_congratulation))
+        execute_query(
+            sql_query,
+            (user_id, user_name, honored, birthday_honored, text_congratulation),
+        )
         print("Пользователь успешно добавлен в таблицу 2")
         logging.info("Пользователь успешно добавлен в таблицу 2")
 
@@ -115,11 +127,7 @@ def add_new_user(table: str, user_id: int, user_name: str, gpt_tokens: int | Non
 def update_row(table: str, user_id: int, column_name: str, new_value: str | int | None):
     """Функция для обновления значения таблицы"""
     if is_user_in_db(table, user_id):
-        sql_query = (
-            f"UPDATE {table} "
-            f"SET {column_name} = ? "
-            f"WHERE user_id = ?;"
-        )
+        sql_query = f"UPDATE {table} " f"SET {column_name} = ? " f"WHERE user_id = ?;"
 
         execute_query(sql_query, (new_value, user_id))
 
@@ -139,11 +147,7 @@ def get_all_users_data(table: str):
 def get_user_data(table: str, user_id: int):
     """Функция для получения конкретной информации от пользователя"""
     if is_user_in_db(table, user_id):
-        sql_query = (
-            f"SELECT * "
-            f"FROM {table} "
-            f"WHERE user_id = {user_id}"
-        )
+        sql_query = f"SELECT * " f"FROM {table} " f"WHERE user_id = {user_id}"
         row = execute_query(sql_query)[0]
         if table == DB_TABLE_USERS_NAME:
             result = {
@@ -185,6 +189,4 @@ def count_users(table: str, user_id: int):
             count = cursor.fetchone()[0]
             return count
     except Exception as e:
-        logging.error(
-            f"Ошибка при подсчёте пользователей в бд: {e}"
-        )
+        logging.error(f"Ошибка при подсчёте пользователей в бд: {e}")

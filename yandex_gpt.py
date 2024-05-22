@@ -10,7 +10,7 @@ from config import (
     LOGS_PATH,
     MAX_MODEL_TOKENS,
     URL_GPT,
-    URL_TOKENS
+    URL_TOKENS,
 )
 
 logging.basicConfig(
@@ -24,28 +24,19 @@ logging.basicConfig(
 def count_tokens_in_dialogue(messages: list) -> int:
     iam_token = get_iam_token()
     headers = {
-        'Authorization': f'Bearer {iam_token}',
-        'Content-Type': 'application/json'
+        "Authorization": f"Bearer {iam_token}",
+        "Content-Type": "application/json",
     }
     data = {
         "modelUri": f"gpt://{FOLDER_ID}/{GPT_MODEL}/latest",
         "maxTokens": MAX_MODEL_TOKENS,
-        "messages": []
+        "messages": [],
     }
 
     for row in messages:
-        data["messages"].append(
-            {
-                "role": row["role"],
-                "text": row["content"]
-            }
-        )
+        data["messages"].append({"role": row["role"], "text": row["content"]})
     try:
-        result = requests.post(
-            url=URL_TOKENS,
-            json=data,
-            headers=headers
-        )
+        result = requests.post(url=URL_TOKENS, json=data, headers=headers)
 
         return len(result.json()["tokens"])
     except Exception as e:
@@ -83,24 +74,15 @@ def ask_gpt_helper(messages) -> str:
         "completionOptions": {
             "stream": False,
             "temperature": 0.6,
-            "maxTokens": MAX_MODEL_TOKENS
+            "maxTokens": MAX_MODEL_TOKENS,
         },
-        "messages": []
+        "messages": [],
     }
 
     for row in messages:
-        data["messages"].append(
-            {
-                "role": row["role"],
-                "text": row["content"]
-            }
-        )
+        data["messages"].append({"role": row["role"], "text": row["content"]})
     try:
-        response = requests.post(
-            url=URL_GPT,
-            headers=headers,
-            json=data
-        )
+        response = requests.post(url=URL_GPT, headers=headers, json=data)
     except Exception as e:
         print(f"Произошла непредвиденная ошибка: {e}.")
         logging.error(f"Произошла непредвиденная ошибка: {e}.")
@@ -115,7 +97,7 @@ def ask_gpt_helper(messages) -> str:
             return result
 
 
-#Примеры, как работать с gpt. Использовла коенструкции, как нам показывал Миша в боте Генераторе сценариев. Тут механика схожа.
+# Примеры, как работать с gpt. Использовла коенструкции, как нам показывал Миша в боте Генераторе сценариев. Тут механика схожа.
 # user_content = "Продолжи историю."  # Формируем user_content
 # messages.append({"role": "user", "content": user_content})
 # tokens_messages = count_tokens_in_dialogue(messages)
