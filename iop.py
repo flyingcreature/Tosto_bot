@@ -15,14 +15,14 @@ class IOP:
         db.create_table()
 
     def sing_up(self, id: int, first_name: str):
-        ids = [user[1] for user in db.get_all_users_data()]
+        ids = [user[1] for user in db.get_all_users_data(DB_TABLE_USERS_NAME)]
         if not db.is_user_in_db and MAX_USERS > len(ids):
             db.add_new_user(DB_TABLE_USERS_NAME, id, first_name, 0)
             db.add_new_user(DB_TABLE_USERS_CONGRATULATION, id, first_name)
         else:
             logging.debug("Пользователь уже зарегистрирован")
 
-    def updd_pgen(self, id: int, event: str, name: str, date: int):
+    def updd_pgen(self, id: int, event: str, name: str, date: float):
         db.update_row(DB_TABLE_USERS_NAME, id, "event", event)
         db.update_row(DB_TABLE_USERS_NAME, id, "human", name)
         db.update_row(DB_TABLE_USERS_CONGRATULATION, id, "birthday_honored", date)
