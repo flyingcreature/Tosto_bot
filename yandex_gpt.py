@@ -98,8 +98,3 @@ def ask_gpt_helper(messages) -> str:
             return result
 
 
-# Примеры, как работать с gpt. Использовла коенструкции, как нам показывал Миша в боте Генераторе сценариев. Тут механика схожа.
-# user_content = "Продолжи историю."  # Формируем user_content
-# messages.append({"role": "user", "content": user_content})
-# tokens_messages = count_tokens_in_dialogue(messages)
-# user_tokens += count_tokens_in_dialogue([{"role": "assistant", "content": answer}])

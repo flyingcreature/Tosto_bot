@@ -15,12 +15,9 @@ class IOP:
        db.create_table()
 
     def sing_up(self, id: int, first_name: str):
-        ids = [user[1] for user in db.get_all_users_data(DB_TABLE_USERS_NAME)]
-        if not db.is_user_in_db and MAX_USERS > len(ids):
-            db.add_new_user(DB_TABLE_USERS_NAME, id, first_name, 0)
-            db.add_new_user(DB_TABLE_USERS_CONGRATULATION, id, first_name)
-        else:
-            logging.debug("Пользователь уже зарегистрирован")
+        db.add_new_user(DB_TABLE_USERS_NAME, id, first_name, 0)
+        db.add_new_user(DB_TABLE_USERS_CONGRATULATION, id, first_name)
+
 
     def updd_pgen(self, id: int, event: str, name: str, date: float):
         db.update_row(DB_TABLE_USERS_NAME, id, "event", event)
@@ -31,7 +28,7 @@ class IOP:
     def generate(self, user_id: int):
         event = db.get_user_data(DB_TABLE_USERS_NAME, user_id)["event"]
         human = db.get_user_data(DB_TABLE_USERS_NAME, user_id)["human"]
-        long = db.get_user_data(DB_TABLE_USERS_NAME, user_id)["long_tost"]
+        long = db.get_user_data(DB_TABLE_USERS_NAME, user_id)["long_congratulation"]
         tokens = db.get_user_data(DB_TABLE_USERS_NAME, user_id)["gpt_tokens"]
 
         prompt = [
@@ -49,9 +46,12 @@ class IOP:
         )
         return answer
 
+
     def last_gen(self, user_id: int):
         return db.get_user_data(DB_TABLE_USERS_CONGRATULATION, user_id)["text_congratulation"], db.get_user_data(DB_TABLE_USERS_CONGRATULATION, user_id)["birthday_honored"]
-    
+
+
+
     def get_inline_keyboard(
         self, values: tuple[tuple[str, str],...]
     ) -> telebot.types.InlineKeyboardMarkup:

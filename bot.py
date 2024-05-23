@@ -56,17 +56,19 @@ def generate(message: telebot.types.Message):
     bot.send_chat_action(message.chat.id, "typing")
     bot.send_message(
         message.chat.id,
-        "Ок давай сгенерируем тост. Отправь имя человека и на какой празник генерируем поздравление через пробел",
+        "Ок давай сгенерируем тост. Отправь имя человека и на какой праздник генерируем поздравление через пробел",
     )
     bot.register_next_step_handler(message, name_event)
 
 
 def name_event(message: telebot.types.Message):
-    name, event = (
-        tuple(message.text.split(" "))
-        if len(message.text.split(" ")) == 2
-        else (None, None)
-    )
+    if len(message.text.split(",")) == 2:
+        name, event = tuple(message.text.split(","))
+    else:
+        bot.send_message(message.chat.id, "Извини, но вы не правильно составили запрос, попробуйте еще раз. Не забудьте про запятую).")
+        name, event = None, None
+        bot.register_next_step_handler(message, name_event)
+
     if name and event:
         today = time.time()
         bot.send_chat_action(message.chat.id, "choose_sticker")
@@ -86,8 +88,8 @@ def name_event(message: telebot.types.Message):
 def last(message: telebot.types.Message):
     txt, date = io.last_gen(message.from_user.id)
     bot.send_chat_action(message.chat.id, "typing")
-    bot.send_message(message.chat.id, f"Вот твоя последняя генерация:\n{txt}\n\n{time.strftime('%d.%m.%Y', date)}", reply_markup=telebot.util.quick_markup({"Меню": {"callback_data": "menu"}}))
-
+    bot.send_message(message.chat.id, f"Вот твоя последняя генерация:\n{txt}",
+                     reply_markup=telebot.util.quick_markup({"Меню": {"callback_data": "menu"}}))
 
 
 @bot.callback_query_handler(func=lambda call: call.data == "menu")

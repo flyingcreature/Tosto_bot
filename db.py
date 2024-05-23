@@ -85,6 +85,12 @@ def create_table():
         logging.error(f"Ошибка при создании таблиц: {e}")
 
 
+def is_user_in_db(table: str, user_id: int) -> bool:
+    """Функция узнать есть ли пользователь в базе"""
+    sql_query = f"SELECT user_id " f"FROM {table} " f"WHERE user_id = ?;"
+    return bool(execute_query(sql_query, (user_id,)))
+
+
 def add_new_user(
         table: str,
         user_id: int,
@@ -127,7 +133,8 @@ def add_new_user(
         logging.info("Пользователь успешно добавлен в таблицу 2")
 
 
-def update_row(table: str, user_id: int, column_name: str, new_value: str | int | None):
+
+def update_row(table: str, user_id: int, column_name: str, new_value: str | int | float | None):
     """Функция для обновления значения таблицы"""
     if is_user_in_db(table, user_id):
         sql_query = f"UPDATE {table} " f"SET {column_name} = ? " f"WHERE user_id = ?;"
@@ -171,12 +178,6 @@ def get_user_data(table: str, user_id: int):
                 "text_congratulation": row[5],
             }
             return result
-
-
-def is_user_in_db(table: str, user_id: int) -> bool:
-    """Функция узнать есть ли пользователь в базе"""
-    sql_query = f"SELECT user_id " f"FROM {table} " f"WHERE user_id = ?;"
-    return bool(execute_query(sql_query, (user_id,)))
 
 
 def count_users(table: str, user_id: int):
