@@ -1,16 +1,11 @@
-import telebot, logging, os, time
+import telebot, logging, time, random, json
 
 import db
-from config import (
-    LOGS_PATH,
-    BOT_TOKEN,
-    ADMINS,
-    DB_TABLE_USERS_CONGRATULATION,
-    DB_TABLE_USERS_NAME,
-)
-from iop import IOP
+from config import *
+from iop import IOP, Monetize
 
 io = IOP()
+mt = Monetize()
 
 logging.basicConfig(
     filename=LOGS_PATH,
@@ -54,6 +49,18 @@ def help(message: telebot.types.Message):
 @bot.message_handler(commands=["gen"])
 def generate(message: telebot.types.Message):
     bot.send_chat_action(message.chat.id, "typing")
+
+    if db.get_user_data(message.from_user.id)["gpt_tokens"] >= MAX_USER_GPT_TOKENS:
+        bot.send_message(
+            message.chat.id,
+            "У вас недостаточно токенов для генерации тоста. Получить токены можно в меню, а пока лови рандомное поздравление",
+        )
+        bot.send_chat_action(message.chat.id, "typing")
+        with open("offline.json", "r") as f:
+            offline_toasts = json.load(f)                    
+            bot.send_message(message.chat.id, random.choice(offline_toasts))
+            return
+        
     bot.send_message(
         message.chat.id,
         "Ок давай сгенерируем тост. Отправь имя человека и на какой праздник генерируем поздравление через пробел",
@@ -65,6 +72,7 @@ def name_event(message: telebot.types.Message):
     if len(message.text.split(",")) == 2:
         name, event = tuple(message.text.split(","))
     else:
+        bot.send_chat_action(message.chat.id, "typing")
         bot.send_message(message.chat.id, "Извини, но вы не правильно составили запрос, попробуйте еще раз. Не забудьте про запятую).")
         name, event = None, None
         bot.register_next_step_handler(message, name_event)
@@ -74,11 +82,19 @@ def name_event(message: telebot.types.Message):
         bot.send_chat_action(message.chat.id, "typing")
         io.updd_pgen(message.from_user.id, event, name, today)
         result = io.generate(message.from_user.id)
+
+        if result == "cd_error":
+            bot.send_message(message.chat.id, "Произошла ошибка при генерации тоста(. Лови утешительный тост")
+            bot.send_chat_action(message.chat.id, "typing")
+            with open("offline.json", "r") as f:
+                offline_toasts = json.load(f)                    
+            bot.send_message(message.chat.id, random.choice(offline_toasts))
+
         bot.send_message(message.chat.id, result)
         bot.send_chat_action(message.chat.id, "typing")
         bot.send_message(
             message.chat.id,
-            "Не за что",
+            "Не за что" if result != "cd_error" else "i`m sorry :(",
             reply_markup=telebot.util.quick_markup({"Меню": {"callback_data": "menu"}}),
         )
 
@@ -101,12 +117,44 @@ def menu(call):
     )
 
     if message is not None:
+        bot.send_chat_action(message.chat.id, "typing")
         bot.send_message(
             message.chat.id,
             "Меню:",
             reply_markup=io.get_inline_keyboard(
-                (("Указать свою дату", "myb"), ("Выбрать длинну поздравлений", "lent"))))
+                (("Указать свое др", "myb"), ("Выбрать длинну поздравлений", "lent"))))
 
+@bot.callback_query_handler(func=lambda call: call.data == "lent")
+def lent(call):
+    message: telebot.types.Message = (
+        call.message if call.message else call.callback_query.message
+    )
+    bot.send_chat_action(message.chat.id, "typing")
+    bot.send_message(message.chat.id, "Напиши длину поздравлений в предложениях (Только цифра)")
+    bot.register_next_step_handler(message, lent_event)
+
+def lent_event(message: telebot.types.Message):
+    if message.text.isdigit():
+        bot.send_chat_action(message.chat.id, "typing")
+        db.update_row(DB_TABLE_USERS_NAME, message.from_user.id,"long_congratulation", int(message.text))
+        bot.send_message(message.chat.id, f"Теперь длина поздравлений будет равна {message.text} предложений")
+    else:
+        bot.send_chat_action(message.chat.id, "typing")
+        bot.send_message(message.chat.id, "Неправильный ввод, попробуй еще раз")
+        bot.register_next_step_handler(message, lent_event)
+
+@bot.callback_query_handler(func=lambda call: call.data == "debt")
+def get_debt(call):
+    message: telebot.types.Message = (
+        call.message if call.message else call.callback_query.message
+    )
+    bot.delete_message(message.chat.id, message.message_id)
+    id = message.chat.id
+    gpt = round(mt.cost_calculation(id, 'gpt'), 2)
+    bot.send_message(id,
+                     f"Вот твой счет:\n\n"
+                     f"За использование YaGPT: {gpt}₽", parse_mode="Markdown")
+    menu(message)
 
 @bot.message_handler(commands=["logs"])
 def send_logs(message):

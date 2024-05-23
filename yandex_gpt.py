@@ -91,6 +91,7 @@ def ask_gpt_helper(messages) -> str:
         if response.status_code != 200:
             print("Не удалось получить ответ :(")
             logging.error(f"Получена ошибка: {response.json()}")
+            return "cd_error"
 
         else:
             result = response.json()["result"]["alternatives"][0]["message"]["text"]

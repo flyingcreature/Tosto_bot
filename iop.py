@@ -15,7 +15,7 @@ class IOP:
        db.create_table()
 
     def sing_up(self, id: int, first_name: str):
-        db.add_new_user(DB_TABLE_USERS_NAME, id, first_name, 0)
+        db.add_new_user(DB_TABLE_USERS_NAME, id, first_name, 0, 3)
         db.add_new_user(DB_TABLE_USERS_CONGRATULATION, id, first_name)
 
 
@@ -36,6 +36,8 @@ class IOP:
         ]
         prompt.append({"role": "user", "content": "Составь тост."})
         answer = gpt.ask_gpt_helper(prompt)
+        if answer == "cd_error":
+            return answer
         prompt.append({"role": "assistant", "content": answer})
         current_tokens_used = gpt.count_tokens_in_dialogue(prompt)
         db.update_row(
@@ -72,5 +74,23 @@ class IOP:
                 )
             )
         return markup
+    
+class Monetize(IOP):
+    def gpt_rate(self, tokens: int) -> float:
+        return tokens * (0.20 / 1000)
+
+    def speechkit_recog_rate(self, blocks: int) -> float:
+        return blocks * 0.16
+
+    def speechkit_synt_rate(self, symbols: int) -> float:
+        return float(symbols * (1320 / 1000000))
+
+    def cost_calculation(self, idp: int, typed: str) -> float:
+        user = db.get_user_data(DB_TABLE_USERS_NAME, idp)
+        gpt_limit = int(user.get("gpt_tokens"))
+        if typed == "gpt":
+            return self.gpt_rate(gpt_limit)
+        else:
+            Exception("Неверный тип технологии для вычисления стоймости")
 
                 
