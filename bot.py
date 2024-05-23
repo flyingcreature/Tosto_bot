@@ -108,11 +108,17 @@ def menu(call):
 
 
 @bot.message_handler(commands=["logs"])
-def logs(message: telebot.types.Message):
-    if message.from_user.id in ADMINS:
-        bot.send_chat_action(message.chat.id, "upload_document")
-        with open(LOGS_PATH, "rb") as file:
-            bot.send_document(message.chat.id, file)
+def send_logs(message):
+    user_id = message.from_user.id
+    if user_id in ADMINS:
+        try:
+            with open(LOGS_PATH, "rb") as f:
+                bot.send_document(message.chat.id, f)
+        except telebot.apihelper.ApiTelegramException:
+            bot.send_message(chat_id=message.chat.id, text="Логов нет!")
+    else:
+        print(f"{user_id} захотел посмотреть логи")
+        logging.info(f"{user_id} захотел посмотреть логи")
 
 
 @bot.message_handler(content_types=["text"])

@@ -68,7 +68,7 @@ def create_table():
         logging.info("Таблица 1 успешно создана")
 
         sql_query_2 = (
-            f"CREATE TABLE {DB_TABLE_USERS_CONGRATULATION} "
+            f"CREATE TABLE IF NOT EXISTS {DB_TABLE_USERS_CONGRATULATION} "
             f"(id INTEGER PRIMARY KEY AUTOINCREMENT, "
             f"user_id INTEGER, "
             f"user_name TEXT, "
@@ -86,14 +86,14 @@ def create_table():
 
 
 def add_new_user(
-    table: str,
-    user_id: int,
-    user_name: str,
-    gpt_tokens: int | None = None,
-    long_congratulation: int | None = None,
-    honored: str | None = None,
-    birthday_honored: str | None = None,
-    text_congratulation: str | None = None,
+        table: str,
+        user_id: int,
+        user_name: str,
+        gpt_tokens: int | None = None,
+        long_congratulation: int | None = None,
+        honored: str | None = None,
+        birthday_honored: str | None = None,
+        text_congratulation: str | None = None,
 ):
     """Функция добавления нового пользователя в базу"""
     if table == DB_TABLE_USERS_NAME:
@@ -157,10 +157,11 @@ def get_user_data(table: str, user_id: int):
                 "user_name": row[2],
                 "event": row[3],
                 "human": row[4],
-                "long_tost": row[5],
-                "gpt_tokens": row[6],
+                "long_congratulation": row[5],
+                "user_birthday": row[6],
+                "gpt_tokens": row[7],
             }
-            return result  # что бы воспользоваться информацией просто пропипши вот так:  gpt_tokens = db.get_user_data(user_id)["gpt_tokens"] и тогда ты получишь токены в переменную gpt_tokens
+            return result
 
         if table == DB_TABLE_USERS_CONGRATULATION:
             result = {
@@ -193,3 +194,5 @@ def count_users(table: str, user_id: int):
             return count
     except Exception as e:
         logging.error(f"Ошибка при подсчёте пользователей в бд: {e}")
+
+

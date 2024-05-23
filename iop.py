@@ -12,7 +12,7 @@ logging.basicConfig(
 
 class IOP:
     def __init__(self) -> None:
-        db.create_table()
+       db.create_table()
 
     def sing_up(self, id: int, first_name: str):
         ids = [user[1] for user in db.get_all_users_data(DB_TABLE_USERS_NAME)]
