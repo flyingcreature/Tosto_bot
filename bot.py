@@ -71,15 +71,14 @@ def name_event(message: telebot.types.Message):
 
     if name and event:
         today = time.time()
-        bot.send_chat_action(message.chat.id, "choose_sticker")
-        io.updd_pgen(message.from_user.id, event, name, today)
         bot.send_chat_action(message.chat.id, "typing")
+        io.updd_pgen(message.from_user.id, event, name, today)
         result = io.generate(message.from_user.id)
         bot.send_message(message.chat.id, result)
         bot.send_chat_action(message.chat.id, "typing")
         bot.send_message(
             message.chat.id,
-            "Незачто",
+            "Не за что",
             reply_markup=telebot.util.quick_markup({"Меню": {"callback_data": "menu"}}),
         )
 
