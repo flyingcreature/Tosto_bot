@@ -193,6 +193,20 @@ def send_logs(message):
         logging.info(f"{user_id} захотел посмотреть логи")
 
 
+@bot.message_handler(commands=["kill_my_session"])
+def kill_session(message: telebot.types.Message):
+    user_id = message.from_user.id
+    if user_id in ADMINS:
+        try:
+            db.update_row(DB_TABLE_USERS_NAME, user_id, "gpt_tokens", 0)
+        except Exception as e:
+            print(f"Произошла ошибка {e}, сессии не обновлены")
+            logging.error(f"Произошла ошибка {e}, сессии не обновлены")
+    else:
+        print(f"{user_id} попытался обновить сессии")
+        logging.info(f"{user_id} попытался обновить сессии")
+
+
 @bot.message_handler(content_types=["text"])
 def text(message: telebot.types.Message):
     bot.send_chat_action(message.chat.id, "typing")
