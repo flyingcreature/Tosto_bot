@@ -63,7 +63,7 @@ def generate(message: telebot.types.Message):
         
     bot.send_message(
         message.chat.id,
-        "Ок давай сгенерируем тост. Отправь имя человека и на какой праздник генерируем поздравление через пробел",
+        "Ок давай сгенерируем тост. Отправь имя человека и на какой праздник генерируем поздравление через запятую",
     )
     bot.register_next_step_handler(message, name_event)
 
