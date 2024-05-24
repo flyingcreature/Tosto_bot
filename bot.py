@@ -130,7 +130,7 @@ def name_event(message: telebot.types.Message):
 
 @bot.message_handler(commands=["last"])
 def last(message: telebot.types.Message):
-    txt = io.last_gen(message.chat.id)
+    txt = db.select_n_last_messages(message.chat.id)
     bot.send_chat_action(message.chat.id, "typing")
     bot.send_message(
         message.chat.id,
@@ -149,6 +149,7 @@ def menu(call):
     )
 
     if message is not None:
+        bot.edit_message_reply_markup(message.chat.id, message.message_id)
         bot.send_chat_action(message.chat.id, "typing")
         bot.send_message(
             message.chat.id,
@@ -165,14 +166,12 @@ def get_debt(call):
         call.message if call.message else call.callback_query.message
     )
     bot.delete_message(message.chat.id, message.message_id)
-    id = message.chat.id
-    gpt = round(mt.cost_calculation(id, "gpt"), 2)
+    gpt = round(mt.cost_calculation(message.chat.id, "gpt"), 2)
     bot.send_message(
-        id,
+        message.chat.id,
         f"Вот ваш счет 💰:\n\n" f"За использование YaGPT: {gpt}₽",
-        parse_mode="Markdown",
+        reply_markup=telebot.util.quick_markup({"Меню": {"callback_data": "menu"}})
     )
-    menu(call.message)
 
 
 @bot.message_handler(commands=["logs"])

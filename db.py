@@ -196,3 +196,34 @@ def count_users(table: str, user_id: int):
             return count
     except Exception as e:
         logging.error(f"Ошибка при подсчёте пользователей в бд: {e}")
+
+
+def select_n_last_messages(user_id, n_last_messages=4):
+    """Функция для получения последних n сообщений пользователя"""
+    messages = []  # список с сообщениями
+
+    try:
+        with sqlite3.connect(DB_NAME) as conn:
+            cursor = conn.cursor()
+            sql_query = (
+                f"SELECT text_congratulation "
+                f"FROM {DB_TABLE_USERS_CONGRATULATION} "
+                f"WHERE user_id=? "
+            )
+            cursor.execute(sql_query, (user_id, n_last_messages))
+            data = cursor.fetchall()
+            # проверяем data на наличие хоть какого-то полученного результата запроса
+            # и на то, что в результате запроса есть хотя бы одно сообщение - data[0]
+            if data and data[0]:
+                # формируем список сообщений
+                for message in reversed(data):
+                    messages.append(message)
+                print(data)
+                print(messages)
+            # если результата нет, так как у нас ещё нет сообщений - возвращаем значения по умолчанию
+            return messages
+    except Exception as e:
+        logging.error(
+            f"Ошибка при получении последних n сообщений: {e}"
+        )  # если ошибка - записываем её в логи
+        return messages
