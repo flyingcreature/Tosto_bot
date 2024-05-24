@@ -16,23 +16,12 @@ class IOP:
 
     def sing_up(self, id: int, first_name: str):
         db.add_new_user(DB_TABLE_USERS_NAME, id, first_name, 0)
-        db.add_new_user(DB_TABLE_USERS_CONGRATULATION, id, first_name)
 
     def updd_pgen(self, id: int, event: str | None, name: str | None, date: float):
         db.update_row(DB_TABLE_USERS_NAME, id, "event", event) if event else None
         db.update_row(DB_TABLE_USERS_NAME, id, "human", name) if name else None
-        (
-            db.update_row(DB_TABLE_USERS_CONGRATULATION, id, "birthday_honored", date)
-            if date
-            else None
-        )
-        (
-            db.update_row(DB_TABLE_USERS_CONGRATULATION, id, "honored", name)
-            if name
-            else None
-        )
 
-    def generate(self, user_id: int):
+    def generate(self, user_id: int, first_name: str):
         event = db.get_user_data(DB_TABLE_USERS_NAME, user_id)["event"]
         human = db.get_user_data(DB_TABLE_USERS_NAME, user_id)["human"]
         long = db.get_user_data(DB_TABLE_USERS_NAME, user_id)["long_congratulation"]
@@ -50,8 +39,9 @@ class IOP:
         db.update_row(
             DB_TABLE_USERS_NAME, user_id, "gpt_tokens", tokens + current_tokens_used
         )
-        db.update_row(
-            DB_TABLE_USERS_CONGRATULATION, user_id, "text_congratulation", answer
+        db.add_new_user(
+            DB_TABLE_USERS_CONGRATULATION, user_id, first_name, None,
+            None, human, None, answer
         )
         return answer
 
@@ -59,10 +49,8 @@ class IOP:
         return (
             db.get_user_data(DB_TABLE_USERS_CONGRATULATION, user_id)[
                 "text_congratulation"
-            ],
-            db.get_user_data(DB_TABLE_USERS_CONGRATULATION, user_id)[
-                "birthday_honored"
-            ],
+            ]
+
         )
 
     def get_inline_keyboard(

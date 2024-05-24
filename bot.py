@@ -93,15 +93,10 @@ def name_name(message: telebot.types.Message):
 def event_event(message: telebot.types.Message):
     io.updd_pgen(message.from_user.id, message.text, None, time.time())
     bot.send_chat_action(message.chat.id, "typing")
-    if not db.get_user_data(DB_TABLE_USERS_NAME, message.from_user.id)[
-        "long_congratulation"
-    ]:
-        bot.send_message(
-            message.chat.id, "Теперь отправьте длину поздравления в предложениях 📏"
-        )
-        bot.register_next_step_handler(message, long_long)
-    else:
-        name_event(message)
+    bot.send_message(
+        message.chat.id, "Теперь отправьте длину поздравления в предложениях 📏"
+    )
+    bot.register_next_step_handler(message, long_long)
 
 
 def long_long(message: telebot.types.Message):
@@ -117,7 +112,7 @@ def long_long(message: telebot.types.Message):
 
 def name_event(message: telebot.types.Message):
     bot.send_chat_action(message.chat.id, "typing")
-    result = io.generate(message.from_user.id)
+    result = io.generate(message.from_user.id, message.from_user.first_name)
 
     if result == "cd_error":
         bot.send_message(
@@ -135,7 +130,7 @@ def name_event(message: telebot.types.Message):
 
 @bot.message_handler(commands=["last"])
 def last(message: telebot.types.Message):
-    txt, date = io.last_gen(message.from_user.id)
+    txt = io.last_gen(message.chat.id)
     bot.send_chat_action(message.chat.id, "typing")
     bot.send_message(
         message.chat.id,
