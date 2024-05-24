@@ -209,6 +209,7 @@ def select_n_last_messages(user_id, n_last_messages=4):
                 f"SELECT text_congratulation "
                 f"FROM {DB_TABLE_USERS_CONGRATULATION} "
                 f"WHERE user_id=? "
+                f"ORDER BY id DESC LIMIT ?"
             )
             cursor.execute(sql_query, (user_id, n_last_messages))
             data = cursor.fetchall()
@@ -218,8 +219,6 @@ def select_n_last_messages(user_id, n_last_messages=4):
                 # формируем список сообщений
                 for message in reversed(data):
                     messages.append(message)
-                print(data)
-                print(messages)
             # если результата нет, так как у нас ещё нет сообщений - возвращаем значения по умолчанию
             return messages
     except Exception as e:

@@ -46,7 +46,7 @@ def start(message: telebot.types.Message):
 
 
 @bot.message_handler(commands=["help"])
-def help(message: telebot.types.Message):
+def send_help(message: telebot.types.Message):
     io.delete_reply_markup(bot, message)
     bot.send_chat_action(message.chat.id, "typing")
     bot.send_message(
@@ -138,8 +138,9 @@ def last(message: telebot.types.Message):
     bot.send_chat_action(message.chat.id, "typing")
     bot.send_message(
         message.chat.id,
-        f"Вот ваша последняя генерация ✉️:\n\n{txt}",
+        f"Вот ваша последняя генерация ✉️:\n\n```json\n{txt}```",
         reply_markup=telebot.util.quick_markup({"Меню": {"callback_data": "menu"}}),
+        parse_mode="markdown"
     )
 
 
