@@ -11,7 +11,6 @@ from config import (
     MAX_MODEL_TOKENS,
     URL_GPT,
     URL_TOKENS,
-    IAM_TOKEN,
 )
 
 logging.basicConfig(
@@ -23,9 +22,9 @@ logging.basicConfig(
 
 
 def count_tokens_in_dialogue(messages: list) -> int:
-    # iam_token = get_iam_token()
+    iam_token = get_iam_token()
     headers = {
-        "Authorization": f"Bearer {IAM_TOKEN}",
+        "Authorization": f"Bearer {iam_token}",
         "Content-Type": "application/json",
     }
     data = {
@@ -62,11 +61,11 @@ def ask_gpt_helper(messages) -> str:
     Отправляет запрос к модели GPT с задачей и предыдущим ответом
     для получения ответа или следующего шага
     """
-    # iam_token = get_iam_token()
+    iam_token = get_iam_token()
 
     headers = {
         "Content-Type": "application/json",
-        "Authorization": f"Bearer {IAM_TOKEN}",
+        "Authorization": f"Bearer {iam_token}",
         "x-folder-id": f"{FOLDER_ID}",
     }
 
