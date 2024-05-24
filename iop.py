@@ -74,9 +74,9 @@ class IOP:
             )
         return markup
 
-    def delete_reply_markup(self, bot, message):
+    def delete_reply_markup(self, bot: telebot.TeleBot, message: telebot.types.Message, min_one: bool = True) -> None:
         try:
-            bot.edit_message_reply_markup(message.chat.id, message.message_id-1)
+            bot.edit_message_reply_markup(message.chat.id, message.message_id-1 if min_one else message.message_id)
         except telebot.apihelper.ApiTelegramException:
             pass
 
