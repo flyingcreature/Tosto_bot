@@ -63,24 +63,33 @@ def generate(message: telebot.types.Message):
         
     bot.send_message(
         message.chat.id,
-        "Ок давай сгенерируем тост. Отправь имя человека и на какой праздник генерируем поздравление через запятую",
+        "Ок давай сгенерируем тост. Отправь имя человека",
     )
-    bot.register_next_step_handler(message, name_event)
+    bot.register_next_step_handler(message, name_name)
 
+def name_name(message: telebot.types.Message):
+    io.updd_pgen(message.from_user.id, None, message.text, time.time())
+    bot.send_chat_action(message.chat.id, "typing")
+    bot.send_message(message.chat.id, "Теперь отправь название мероприятия")
+    bot.register_next_step_handler(message, event_event)
+
+def event_event(message: telebot.types.Message):
+    io.updd_pgen(message.from_user.id, message.text, None, time.time())
+    bot.send_chat_action(message.chat.id, "typing")
+    if not db.get_user_data(message.from_user.id)["long_congratulation"]:
+        bot.send_message(message.chat.id, "Теперь отправь длинну поздравления в предложениях")
+        bot.register_next_step_handler(message, long_long)
+    else:
+        name_event(message)
+
+def long_long(message: telebot.types.Message):
+    if message.text.isdigit():
+        db.update_row(DB_TABLE_USERS_NAME, message.from_user.id,"long_congratulation", int(message.text))
+        name_event(message)
 
 def name_event(message: telebot.types.Message):
-    if len(message.text.split(",")) == 2:
-        name, event = tuple(message.text.split(","))
-    else:
-        bot.send_chat_action(message.chat.id, "typing")
-        bot.send_message(message.chat.id, "Извини, но вы не правильно составили запрос, попробуйте еще раз. Не забудьте про запятую).")
-        name, event = None, None
-        bot.register_next_step_handler(message, name_event)
-
-    if name and event:
         today = time.time()
         bot.send_chat_action(message.chat.id, "typing")
-        io.updd_pgen(message.from_user.id, event, name, today)
         result = io.generate(message.from_user.id)
 
         if result == "cd_error":

@@ -15,15 +15,15 @@ class IOP:
        db.create_table()
 
     def sing_up(self, id: int, first_name: str):
-        db.add_new_user(DB_TABLE_USERS_NAME, id, first_name, 0, 3)
+        db.add_new_user(DB_TABLE_USERS_NAME, id, first_name, 0)
         db.add_new_user(DB_TABLE_USERS_CONGRATULATION, id, first_name)
 
 
     def updd_pgen(self, id: int, event: str, name: str, date: float):
-        db.update_row(DB_TABLE_USERS_NAME, id, "event", event)
-        db.update_row(DB_TABLE_USERS_NAME, id, "human", name)
-        db.update_row(DB_TABLE_USERS_CONGRATULATION, id, "birthday_honored", date)
-        db.update_row(DB_TABLE_USERS_CONGRATULATION, id, "honored", name)
+        db.update_row(DB_TABLE_USERS_NAME, id, "event", event) if event else None
+        db.update_row(DB_TABLE_USERS_NAME, id, "human", name) if name else None
+        db.update_row(DB_TABLE_USERS_CONGRATULATION, id, "birthday_honored", date) if date else None
+        db.update_row(DB_TABLE_USERS_CONGRATULATION, id, "honored", name) if name else None
 
     def generate(self, user_id: int):
         event = db.get_user_data(DB_TABLE_USERS_NAME, user_id)["event"]
