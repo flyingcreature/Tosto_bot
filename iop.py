@@ -1,4 +1,4 @@
-from config import *
+from config import DB_TABLE_USERS_NAME, DB_TABLE_USERS_CONGRATULATION, LOGS_PATH
 import db, logging, telebot
 import yandex_gpt as gpt
 
@@ -12,18 +12,25 @@ logging.basicConfig(
 
 class IOP:
     def __init__(self) -> None:
-       db.create_table()
+        db.create_table()
 
     def sing_up(self, id: int, first_name: str):
         db.add_new_user(DB_TABLE_USERS_NAME, id, first_name, 0)
         db.add_new_user(DB_TABLE_USERS_CONGRATULATION, id, first_name)
 
-
-    def updd_pgen(self, id: int, event: str, name: str, date: float):
+    def updd_pgen(self, id: int, event: str | None, name: str | None, date: float):
         db.update_row(DB_TABLE_USERS_NAME, id, "event", event) if event else None
         db.update_row(DB_TABLE_USERS_NAME, id, "human", name) if name else None
-        db.update_row(DB_TABLE_USERS_CONGRATULATION, id, "birthday_honored", date) if date else None
-        db.update_row(DB_TABLE_USERS_CONGRATULATION, id, "honored", name) if name else None
+        (
+            db.update_row(DB_TABLE_USERS_CONGRATULATION, id, "birthday_honored", date)
+            if date
+            else None
+        )
+        (
+            db.update_row(DB_TABLE_USERS_CONGRATULATION, id, "honored", name)
+            if name
+            else None
+        )
 
     def generate(self, user_id: int):
         event = db.get_user_data(DB_TABLE_USERS_NAME, user_id)["event"]
@@ -48,14 +55,18 @@ class IOP:
         )
         return answer
 
-
     def last_gen(self, user_id: int):
-        return db.get_user_data(DB_TABLE_USERS_CONGRATULATION, user_id)["text_congratulation"], db.get_user_data(DB_TABLE_USERS_CONGRATULATION, user_id)["birthday_honored"]
-
-
+        return (
+            db.get_user_data(DB_TABLE_USERS_CONGRATULATION, user_id)[
+                "text_congratulation"
+            ],
+            db.get_user_data(DB_TABLE_USERS_CONGRATULATION, user_id)[
+                "birthday_honored"
+            ],
+        )
 
     def get_inline_keyboard(
-        self, values: tuple[tuple[str, str],...]
+            self, values: tuple[tuple[str, str], ...]
     ) -> telebot.types.InlineKeyboardMarkup:
         """
         Creates an inline keyboard markup.
@@ -74,8 +85,9 @@ class IOP:
                 )
             )
         return markup
-    
-class Monetize(IOP):
+
+
+class Monetize:
     def gpt_rate(self, tokens: int) -> float:
         return tokens * (0.20 / 1000)
 
@@ -92,5 +104,3 @@ class Monetize(IOP):
             return self.gpt_rate(gpt_limit)
         else:
             Exception("Неверный тип технологии для вычисления стоймости")
-
-                

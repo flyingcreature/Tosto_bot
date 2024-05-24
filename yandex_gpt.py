@@ -11,7 +11,7 @@ from config import (
     MAX_MODEL_TOKENS,
     URL_GPT,
     URL_TOKENS,
-    IAM_TOKEN
+    IAM_TOKEN,
 )
 
 logging.basicConfig(
@@ -23,7 +23,7 @@ logging.basicConfig(
 
 
 def count_tokens_in_dialogue(messages: list) -> int:
-    #iam_token = get_iam_token()
+    # iam_token = get_iam_token()
     headers = {
         "Authorization": f"Bearer {IAM_TOKEN}",
         "Content-Type": "application/json",
@@ -45,13 +45,13 @@ def count_tokens_in_dialogue(messages: list) -> int:
         logging.error(f"Ошибка при подсчёте токенов{e}")
 
 
-def get_system_content(event, human, long_tost):
+def get_system_content(event, human, long_congratulation):
     """Функция, которая собирает строку для system_content"""
     return (
         f"Ты известный ведущий с большим стажем, "
         f"у тебя большой опыт в составлении тостов и поздравлений на различные мероприятия. "
         f"Твоя задача придумать тост на {event}. Поздравлять ты будешь {human}. "
-        f"По длине поздравление должно быть в {long_tost} предложений. "
+        f"По длине поздравление должно быть в {long_congratulation} предложений. "
         f"Можешь использовать разный фольклор, что бы сделать тост краше."
         f"Не давай никаких инструкций, пользователь знает всё сам."
     )
@@ -62,7 +62,7 @@ def ask_gpt_helper(messages) -> str:
     Отправляет запрос к модели GPT с задачей и предыдущим ответом
     для получения ответа или следующего шага
     """
-    #iam_token = get_iam_token()
+    # iam_token = get_iam_token()
 
     headers = {
         "Content-Type": "application/json",
@@ -97,5 +97,3 @@ def ask_gpt_helper(messages) -> str:
             result = response.json()["result"]["alternatives"][0]["message"]["text"]
             messages.append({"role": "assistant", "content": result})
             return result
-
-

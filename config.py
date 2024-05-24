@@ -16,6 +16,8 @@ ADMINS = [1645457137, 786540182, 6303315695]  # Список user_id админ�
 
 MAX_USER_GPT_TOKENS = 5000  # 5 000 токенов для генерации текста
 
+MAX_MODEL_TOKENS = 100  # Максимальный размер ответа
+
 DB_NAME = f"db.sqlite"  # файл для базы данных
 
 DB_TABLE_USERS_NAME = (
@@ -28,7 +30,7 @@ DB_TABLE_USERS_CONGRATULATION = (
 
 GPT_MODEL = "yandexgpt"  # Модель gpt
 
-IAM_TOKEN_ENDPOINT = "http://169.254.169.254/computeMetadata/v1/instance/service-accounts/default/token"  # Адресс токена
+IAM_TOKEN_ENDPOINT = "http://169.254.169.254/computeMetadata/v1/instance/service-accounts/default/token"  # Адрес токена
 
 IAM_TOKEN_PATH = f"token_data.json"  # Путь к json файлу с ключом
 

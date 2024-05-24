@@ -92,14 +92,14 @@ def is_user_in_db(table: str, user_id: int) -> bool:
 
 
 def add_new_user(
-        table: str,
-        user_id: int,
-        user_name: str,
-        gpt_tokens: int | None = None,
-        long_congratulation: int | None = None,
-        honored: str | None = None,
-        birthday_honored: str | None = None,
-        text_congratulation: str | None = None,
+    table: str,
+    user_id: int,
+    user_name: str,
+    gpt_tokens: int | None = None,
+    long_congratulation: int | None = None,
+    honored: str | None = None,
+    birthday_honored: str | None = None,
+    text_congratulation: str | None = None,
 ):
     """Функция добавления нового пользователя в базу"""
     if table == DB_TABLE_USERS_NAME:
@@ -133,8 +133,9 @@ def add_new_user(
         logging.info("Пользователь успешно добавлен в таблицу 2")
 
 
-
-def update_row(table: str, user_id: int, column_name: str, new_value: str | int | float | None):
+def update_row(
+    table: str, user_id: int, column_name: str, new_value: str | int | float | None
+):
     """Функция для обновления значения таблицы"""
     if is_user_in_db(table, user_id):
         sql_query = f"UPDATE {table} " f"SET {column_name} = ? " f"WHERE user_id = ?;"
@@ -195,5 +196,3 @@ def count_users(table: str, user_id: int):
             return count
     except Exception as e:
         logging.error(f"Ошибка при подсчёте пользователей в бд: {e}")
-
-
