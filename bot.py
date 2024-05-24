@@ -149,7 +149,10 @@ def menu(call):
     )
 
     if message is not None:
-        bot.edit_message_reply_markup(message.chat.id, message.message_id)
+        try:
+            bot.edit_message_reply_markup(message.chat.id, message.message_id)
+        except telebot.apihelper.ApiTelegramException:
+            pass
         bot.send_chat_action(message.chat.id, "typing")
         bot.send_message(
             message.chat.id,
