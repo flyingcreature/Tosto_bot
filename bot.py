@@ -35,6 +35,7 @@ def emergency_stop(message: telebot.types.Message):
 
 @bot.message_handler(commands=["start"])
 def start(message: telebot.types.Message):
+    io.delete_reply_markup(bot, message)
     bot.send_chat_action(message.chat.id, "typing")
     bot.send_message(
         message.chat.id,
@@ -46,6 +47,7 @@ def start(message: telebot.types.Message):
 
 @bot.message_handler(commands=["help"])
 def help(message: telebot.types.Message):
+    io.delete_reply_markup(bot, message)
     bot.send_chat_action(message.chat.id, "typing")
     bot.send_message(
         message.chat.id,
@@ -57,6 +59,7 @@ def help(message: telebot.types.Message):
 
 @bot.message_handler(commands=["gen"])
 def generate(message: telebot.types.Message):
+    io.delete_reply_markup(bot, message)
     bot.send_chat_action(message.chat.id, "typing")
 
     if (
@@ -130,6 +133,7 @@ def name_event(message: telebot.types.Message):
 
 @bot.message_handler(commands=["last"])
 def last(message: telebot.types.Message):
+    io.delete_reply_markup(bot, message)
     txt = db.select_n_last_messages(message.chat.id)
     bot.send_chat_action(message.chat.id, "typing")
     bot.send_message(
@@ -149,10 +153,7 @@ def menu(call):
     )
 
     if message is not None:
-        try:
-            bot.edit_message_reply_markup(message.chat.id, message.message_id)
-        except telebot.apihelper.ApiTelegramException:
-            pass
+        io.delete_reply_markup(bot, message)
         bot.send_chat_action(message.chat.id, "typing")
         bot.send_message(
             message.chat.id,

@@ -74,6 +74,12 @@ class IOP:
             )
         return markup
 
+    def delete_reply_markup(self, bot, message):
+        try:
+            bot.edit_message_reply_markup(message.chat.id, message.message_id-1)
+        except telebot.apihelper.ApiTelegramException:
+            pass
+
 
 class Monetize:
     def gpt_rate(self, tokens: int) -> float:
