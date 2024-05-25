@@ -79,7 +79,27 @@ class IOP:
             bot.edit_message_reply_markup(message.chat.id, message.message_id-1 if min_one else message.message_id)
         except telebot.apihelper.ApiTelegramException:
             pass
+    
+    def get_reply_markup(
+        self, values: list[str]
+    ) -> telebot.types.ReplyKeyboardMarkup | None:
+        """
+        Creates a reply markup.
 
+        Args:
+            values (list[str]): The values for the reply keyboard buttons.
+
+        Returns:
+            telebot.types.ReplyKeyboardMarkup or None: The created reply markup, or None if
+            the values list is empty.
+        """
+        if values:
+            markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
+            for value in values:
+                markup.add(value)
+            return markup
+        else:
+            return None
 
 class Monetize:
     def gpt_rate(self, tokens: int) -> float:

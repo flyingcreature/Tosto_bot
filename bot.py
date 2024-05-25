@@ -135,13 +135,23 @@ def name_event(message: telebot.types.Message):
 def last(message: telebot.types.Message):
     io.delete_reply_markup(bot, message)
     txt = db.select_n_last_messages(message.chat.id)
-    bot.send_chat_action(message.chat.id, "typing")
-    bot.send_message(
-        message.chat.id,
-        f"Вот ваша последняя генерация ✉️:\n\n```json\n{txt}```",
-        reply_markup=telebot.util.quick_markup({"Меню": {"callback_data": "menu"}}),
-        parse_mode="markdown"
-    )
+    if db.get_user_data(DB_TABLE_USERS_NAME, message.from_user.id)["code_last"]:
+        bot.send_chat_action(message.chat.id, "typing")
+        bot.send_message(
+            message.chat.id,
+            f"Вот ваши последние генерации ✉️:\n\n```json\n{txt}```",
+            reply_markup=telebot.util.quick_markup({"Меню": {"callback_data": "menu"}}),
+            parse_mode="markdown"
+        )
+    else:
+        bot.send_chat_action(message.chat.id, "typing")
+        bot.send_message(message.chat.id,"Вот ваши последние генерации ✉️:")
+        for gen in txt:
+            bot.send_chat_action(message.chat.id, "typing")
+            bot.send_message(message.chat.id, gen[0])
+ 
+
+
 
 
 @bot.callback_query_handler(func=lambda call: call.data == "menu")
@@ -160,7 +170,7 @@ def menu(call):
             message.chat.id,
             "Меню:",
             reply_markup=io.get_inline_keyboard(
-                (("Указать свой день рождения (в разработке)", "myb"), ("Показать счет", "debt"))
+                (("Указать свой день рождения (в разработке)", "myb"), ("Показать счет", "debt"), ("Изменить вид отображения последних генераций", "ch_code_last"))
             ),
         )
 
@@ -177,6 +187,23 @@ def get_debt(call):
         f"Вот ваш счет 💰:\n\n" f"За использование YaGPT: {gpt}₽",
         reply_markup=telebot.util.quick_markup({"Меню": {"callback_data": "menu"}})
     )
+
+@bot.callback_query_handler(func=lambda call: call.data == "ch_code_last")
+def ch_last(call):
+    message: telebot.types.Message = (
+        call.message if call.message else call.callback_query.message
+    )
+    bot.delete_message(message.chat.id, message.message_id)
+    bot.send_message(message.chat.id, f"Ок, давай изменим. Выбери из списка вариант отображения\n\nСейчас стоит {"code" if db.get_user_data(DB_TABLE_USERS_NAME, message.from_user.id)['code_last'] else "обычный"}", reply_markup=io.get_reply_markup(["code", "обычный"]))
+    bot.register_next_step_handler(message, sl_last)
+
+def sl_last(message: telebot.types.Message):
+    if message.text == "code":
+        db.update_row(DB_TABLE_USERS_NAME, message.from_user.id, "code_last", True)
+        bot.send_message(message.chat.id, "Выбран вариант отображения последних генераций в виде кода")
+    elif message.text == "обычный":
+        db.update_row(DB_TABLE_USERS_NAME, message.from_user.id, "code_last", False)
+        bot.send_message(message.chat.id, "Выбран вариант отображения последних генераций в виде текста")
 
 
 @bot.message_handler(commands=["logs"])
