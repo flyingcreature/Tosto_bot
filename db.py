@@ -60,9 +60,9 @@ def create_table():
             f"event TEXT, "
             f"human TEXT, "
             f"long_congratulation INTEGER, "
-            f"user_birthday REAL,"
-            f"gpt_tokens INTEGER,"
-            "code_last INTEGER); "
+            f"user_birthday REAL, "
+            f"code_last INTEGER, "
+            f"gpt_tokens INTEGER); "
         )
         execute_query(sql_query)
         print("Таблица 1 успешно создана")
@@ -93,14 +93,14 @@ def is_user_in_db(table: str, user_id: int) -> bool:
 
 
 def add_new_user(
-        table: str,
-        user_id: int,
-        user_name: str,
-        gpt_tokens: int | None = None,
-        long_congratulation: int | None = None,
-        honored: str | None = None,
-        birthday_honored: str | None = None,
-        text_congratulation: str | None = None,
+    table: str,
+    user_id: int,
+    user_name: str,
+    gpt_tokens: int | None = None,
+    long_congratulation: int | None = None,
+    honored: str | None = None,
+    birthday_honored: str | None = None,
+    text_congratulation: str | None = None,
 ):
     """Функция добавления нового пользователя в базу"""
     if table == DB_TABLE_USERS_NAME:
@@ -135,7 +135,7 @@ def add_new_user(
 
 
 def update_row(
-        table: str, user_id: int, column_name: str, new_value: str | int | float | None
+    table: str, user_id: int, column_name: str, new_value: str | int | float | None
 ):
     """Функция для обновления значения таблицы"""
     if is_user_in_db(table, user_id):
@@ -168,8 +168,8 @@ def get_user_data(table: str, user_id: int):
                 "human": row[4],
                 "long_congratulation": row[5],
                 "user_birthday": row[6],
-                "gpt_tokens": row[7],
-                "code_last": row[8],
+                "code_last": row[7],
+                "gpt_tokens": row[8],
             }
             return result
 

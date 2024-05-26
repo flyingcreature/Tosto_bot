@@ -40,21 +40,24 @@ class IOP:
             DB_TABLE_USERS_NAME, user_id, "gpt_tokens", tokens + current_tokens_used
         )
         db.add_new_user(
-            DB_TABLE_USERS_CONGRATULATION, user_id, first_name, None,
-            None, human, None, answer
+            DB_TABLE_USERS_CONGRATULATION,
+            user_id,
+            first_name,
+            None,
+            None,
+            human,
+            None,
+            answer,
         )
         return answer
 
     def last_gen(self, user_id: int):
-        return (
-            db.get_user_data(DB_TABLE_USERS_CONGRATULATION, user_id)[
-                "text_congratulation"
-            ]
-
-        )
+        return db.get_user_data(DB_TABLE_USERS_CONGRATULATION, user_id)[
+            "text_congratulation"
+        ]
 
     def get_inline_keyboard(
-            self, values: tuple[tuple[str, str], ...]
+        self, values: tuple[tuple[str, str], ...]
     ) -> telebot.types.InlineKeyboardMarkup:
         """
         Creates an inline keyboard markup.
@@ -74,12 +77,17 @@ class IOP:
             )
         return markup
 
-    def delete_reply_markup(self, bot: telebot.TeleBot, message: telebot.types.Message, min_one: bool = True) -> None:
+    def delete_reply_markup(
+        self, bot: telebot.TeleBot, message: telebot.types.Message, min_one: bool = True
+    ) -> None:
         try:
-            bot.edit_message_reply_markup(message.chat.id, message.message_id-1 if min_one else message.message_id)
+            bot.edit_message_reply_markup(
+                message.chat.id,
+                message.message_id - 1 if min_one else message.message_id,
+            )
         except telebot.apihelper.ApiTelegramException:
             pass
-    
+
     def get_reply_markup(
         self, values: list[str]
     ) -> telebot.types.ReplyKeyboardMarkup | None:
@@ -100,6 +108,7 @@ class IOP:
             return markup
         else:
             return None
+
 
 class Monetize:
     def gpt_rate(self, tokens: int) -> float:
