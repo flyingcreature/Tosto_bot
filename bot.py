@@ -194,7 +194,7 @@ def ch_last(call):
         call.message if call.message else call.callback_query.message
     )
     bot.delete_message(message.chat.id, message.message_id)
-    bot.send_message(message.chat.id, f"Ок, давай изменим. Выбери из списка вариант отображения\n\nСейчас стоит {"code" if db.get_user_data(DB_TABLE_USERS_NAME, message.from_user.id)['code_last'] else "обычный"}", reply_markup=io.get_reply_markup(["code", "обычный"]))
+    bot.send_message(message.chat.id, f"Ок, давай изменим. Выбери из списка вариант отображения.", reply_markup=io.get_reply_markup(["code", "обычный"]))
     bot.register_next_step_handler(message, sl_last)
 
 def sl_last(message: telebot.types.Message):
