@@ -61,7 +61,8 @@ def create_table():
             f"human TEXT, "
             f"long_congratulation INTEGER, "
             f"user_birthday REAL,"
-            f"gpt_tokens INTEGER); "
+            f"gpt_tokens INTEGER,"
+            "code_last INTEGER); "
         )
         execute_query(sql_query)
         print("Таблица 1 успешно создана")
@@ -106,8 +107,8 @@ def add_new_user(
         if not is_user_in_db(table, user_id):
             sql_query = (
                 f"INSERT INTO {DB_TABLE_USERS_NAME} "
-                "(user_id, user_name, gpt_tokens, long_congratulation) "
-                "VALUES (?, ?, ?, ?);"
+                "(user_id, user_name, gpt_tokens, long_congratulation, code_last) "
+                "VALUES (?, ?, ?, ?, 1);"
             )
             execute_query(
                 sql_query, (user_id, user_name, gpt_tokens, long_congratulation)
@@ -168,6 +169,7 @@ def get_user_data(table: str, user_id: int):
                 "long_congratulation": row[5],
                 "user_birthday": row[6],
                 "gpt_tokens": row[7],
+                "code_last": row[8],
             }
             return result
 
