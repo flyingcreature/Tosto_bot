@@ -60,8 +60,9 @@ def create_table():
             f"event TEXT, "
             f"human TEXT, "
             f"long_congratulation INTEGER, "
-            f"user_birthday REAL, "
+            f"user_birthday TEXT, "
             f"code_last INTEGER, "
+            "countdown_brth INTEGER"
             f"gpt_tokens INTEGER); "
         )
         execute_query(sql_query)
@@ -169,7 +170,8 @@ def get_user_data(table: str, user_id: int):
                 "long_congratulation": row[5],
                 "user_birthday": row[6],
                 "code_last": row[7],
-                "gpt_tokens": row[8],
+                "countdown_brth": row[8],
+                "gpt_tokens": row[9],
             }
             return result
 
