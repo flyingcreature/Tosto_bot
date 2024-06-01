@@ -1,5 +1,5 @@
 import telebot, logging, time, random, json
-
+from telebot.types import Message, CallbackQuery
 import db
 from config import (
     LOGS_PATH,
@@ -24,7 +24,7 @@ bot = telebot.TeleBot(BOT_TOKEN)
 
 
 @bot.message_handler(commands=["emergency_stop"])
-def emergency_stop(message: telebot.types.Message):
+def emergency_stop(message: Message):
     if message.from_user.id in ADMINS:
         for user in ADMINS:
             bot.send_chat_action(user, "typing")
@@ -34,7 +34,7 @@ def emergency_stop(message: telebot.types.Message):
 
 
 @bot.message_handler(commands=["start"])
-def start(message: telebot.types.Message):
+def start(message: Message):
     io.delete_reply_markup(bot, message)
     bot.send_chat_action(message.chat.id, "typing")
     bot.send_message(
@@ -46,19 +46,19 @@ def start(message: telebot.types.Message):
 
 
 @bot.message_handler(commands=["help"])
-def send_help(message: telebot.types.Message):
+def send_help(message: Message):
     io.delete_reply_markup(bot, message)
     bot.send_chat_action(message.chat.id, "typing")
     bot.send_message(
         message.chat.id,
         "Чтобы сгенерировать тост, напиши /gen 🖊️\n\n Чтобы увидить последний сгенерированый тост напишите /last 📃"
-        "\n\nОткрыть меню - /menu 📲\n\n👈P.S. Все эти команды видны в списке слева от поля ввода."
+        "\n\nОткрыть меню - /menu 📲\n\nФункция обратного отсчета до дня рождения присылает количество дней в 00:00 UTC\n\n👈P.S. Все эти команды видны в списке слева от поля ввода."
         "\nP.S.#2 В контексте бота тост == поздравление 🎉",
     )
 
 
 @bot.message_handler(commands=["gen"])
-def generate(message: telebot.types.Message):
+def generate(message: Message):
     io.delete_reply_markup(bot, message)
     bot.send_chat_action(message.chat.id, "typing")
 
@@ -84,7 +84,7 @@ def generate(message: telebot.types.Message):
     bot.register_next_step_handler(message, name_name)
 
 
-def name_name(message: telebot.types.Message):
+def name_name(message: Message):
     io.updd_pgen(message.from_user.id, None, message.text, time.time())
     bot.send_chat_action(message.chat.id, "typing")
     bot.send_message(
@@ -93,7 +93,7 @@ def name_name(message: telebot.types.Message):
     bot.register_next_step_handler(message, event_event)
 
 
-def event_event(message: telebot.types.Message):
+def event_event(message: Message):
     io.updd_pgen(message.from_user.id, message.text, None, time.time())
     bot.send_chat_action(message.chat.id, "typing")
     bot.send_message(
@@ -102,7 +102,7 @@ def event_event(message: telebot.types.Message):
     bot.register_next_step_handler(message, long_long)
 
 
-def long_long(message: telebot.types.Message):
+def long_long(message: Message):
     if message.text.isdigit():
         db.update_row(
             DB_TABLE_USERS_NAME,
@@ -116,7 +116,7 @@ def long_long(message: telebot.types.Message):
         bot.register_next_step_handler(message, long_long)
 
 
-def name_event(message: telebot.types.Message):
+def name_event(message: Message):
     bot.send_chat_action(message.chat.id, "typing")
     result = io.generate(message.from_user.id, message.from_user.first_name)
 
@@ -135,7 +135,7 @@ def name_event(message: telebot.types.Message):
 
 
 @bot.message_handler(commands=["last"])
-def last(message: telebot.types.Message):
+def last(message: Message):
     io.delete_reply_markup(bot, message)
     txt = db.select_n_last_messages(message.chat.id)
     if db.get_user_data(DB_TABLE_USERS_NAME, message.from_user.id)["code_last"]:
@@ -156,49 +156,67 @@ def last(message: telebot.types.Message):
 
 @bot.callback_query_handler(func=lambda call: call.data == "menu")
 @bot.message_handler(commands=["menu"])
-def menu(call):
-    message: telebot.types.Message = (
+def menu(call: CallbackQuery):
+    message: Message = (
         call.message
         if hasattr(call, "message")
-        else call.message if isinstance(call, telebot.types.CallbackQuery) else call
+        else call
     )
 
-    if message is not None:
-        io.delete_reply_markup(bot, message, False)
-        io.delete_reply_markup(bot, message)
-        bot.send_chat_action(message.chat.id, "typing")
-        bot.send_message(
-            message.chat.id,
-            "Меню:",
-            reply_markup=io.get_inline_keyboard(
-                (
-                    ("Указать свой день рождения (в разработке)", "myb"),
-                    ("Изменить вид отображения последних генераций", "ch_code_last"),
-                    ("Показать счет", "debt"),
-                )
-            ),
-        )
+    io.delete_reply_markup(bot, message, False)
+    io.delete_reply_markup(bot, message)
+    bot.send_chat_action(message.chat.id, "typing")
+    bot.send_message(
+        message.chat.id,
+        "Меню:",
+        reply_markup=io.get_inline_keyboard(
+            (
+                ("Указать свой день рождения (в разработке)", "myb"),
+                ("Изменить вид отображения последних генераций", "ch_code_last"),
+                ("Показать счет", "debt"),
+            )
+        ),
+    )
 
+@bot.callback_query_handler(func=lambda call: call.data == "myb")
+def get_bth(call: CallbackQuery):
+    message: Message = call.message
+    bot.send_chat_action(message.chat.id, "typing")
+    if db.get_user_data(DB_TABLE_USERS_NAME, message.from_user.id)["user_birthday"]:
+        bot.send_message(message.chat.id, f"{message.from_user.first_name} отправь свой день рождения в формате *день.месяц.год*\n**Пример: 18.09.2009**", parse_mode="markdown")
+        bot.register_next_step_handler(select_bth)
+    else:
+        bot.send_chat_action(message.chat.id, "typing")
+        odb(call)
+
+def select_bth(message: Message):
+    bot.send_chat_action(message.chat.id, "typing")
+    db.update_row(DB_TABLE_USERS_NAME, message.from_user.id, "user_birthday", message.text)
+    time.sleep(1)
+    bot.send_message(message.chat.id, "Записал 📝", reply_markup=io.get_inline_keyboard((("Отдел ДР 🎉","odr"))))
+
+@bot.callback_query_handler(func=lambda call: call.data == "odb")
+def odb(call: CallbackQuery):
+    message: Message = call.message
+    bot.send_message(message.chat.id, "📇", reply_markup=io.get_inline_keyboard((("Включить отсчет до дня рождения" if not db.get_user_data(DB_TABLE_USERS_NAME, message.from_user.id)["countdown_brth"] else "Отключить обратный отсчет до ДР"),
+    (""))))
+    
 
 @bot.callback_query_handler(func=lambda call: call.data == "debt")
 def get_debt(call):
-    message: telebot.types.Message = (
-        call.message if call.message else call.callback_query.message
-    )
+    message: Message = call.message
     bot.delete_message(message.chat.id, message.message_id)
     gpt = round(mt.cost_calculation(message.chat.id, "gpt"), 2)
     bot.send_message(
         message.chat.id,
-        f"Вот ваш счет 💰:\n\n" f"За использование YaGPT: {gpt}₽",
+        f"Вот ваш счет 🧾:\n\n" f"За использование YaGPT: {gpt}₽",
         reply_markup=telebot.util.quick_markup({"Меню": {"callback_data": "menu"}}),
     )
 
 
 @bot.callback_query_handler(func=lambda call: call.data == "ch_code_last")
-def ch_last(call):
-    message: telebot.types.Message = (
-        call.message if call.message else call.callback_query.message
-    )
+def ch_last(call: CallbackQuery):
+    message: Message = call.message
     bot.delete_message(message.chat.id, message.message_id)
     bot.send_message(
         message.chat.id,
@@ -208,7 +226,7 @@ def ch_last(call):
     bot.register_next_step_handler(message, sl_last)
 
 
-def sl_last(message: telebot.types.Message):
+def sl_last(message: Message):
     if message.text == "code":
         db.update_row(DB_TABLE_USERS_NAME, message.from_user.id, "code_last", True)
         bot.send_message(
@@ -233,7 +251,7 @@ def sl_last(message: telebot.types.Message):
 
 
 @bot.message_handler(commands=["logs"])
-def send_logs(message):
+def send_logs(message: Message):
     user_id = message.from_user.id
     if user_id in ADMINS:
         try:
@@ -247,7 +265,7 @@ def send_logs(message):
 
 
 @bot.message_handler(commands=["kill_my_session"])
-def kill_session(message: telebot.types.Message):
+def kill_session(message: Message):
     user_id = message.from_user.id
     if user_id in ADMINS:
         try:
@@ -261,7 +279,7 @@ def kill_session(message: telebot.types.Message):
 
 
 @bot.message_handler(content_types=["text"])
-def text(message: telebot.types.Message):
+def text(message: Message):
     bot.send_chat_action(message.chat.id, "typing")
     io.delete_reply_markup(bot, message)
     bot.send_message(
